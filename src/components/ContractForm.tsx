@@ -37,11 +37,11 @@ import {
 } from 'lucide-react';
 
 interface ContractFormProps {
-  authToken: string;
+  authData: any;
   onLogout: () => void;
 }
 
-export const ContractForm: React.FC<ContractFormProps> = ({ authToken, onLogout }) => {
+export const ContractForm: React.FC<ContractFormProps> = ({ authData, onLogout }) => {
   const [documentType, setDocumentType] = useState<DocumentType | null>(null);
   const [procuracaoType, setProcuracaoType] = useState<ProcuracaoType | null>(null);
   const [formData, setFormData] = useState<Partial<DocumentData>>({
@@ -159,6 +159,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({ authToken, onLogout 
     { value: 'SE', label: 'Sergipe' },
     { value: 'TO', label: 'Tocantins' }
   ];
+  
   const getTotalSteps = (): number => {
     if (documentType === 'locacao') return 5;
     if (documentType === 'prestacao') return 4;
@@ -184,7 +185,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({ authToken, onLogout 
     setIsLoading(true);
     setMessage(null);
 
-    const response = await sendToWebhook(formData as DocumentData, authToken);
+    const response = await sendToWebhook(formData as DocumentData, authData);
 
     setMessage({
       type: response.success ? 'success' : 'error',
@@ -638,51 +639,12 @@ export const ContractForm: React.FC<ContractFormProps> = ({ authToken, onLogout 
             required
           />
           <FormField
-            label="Rua/Avenida"
-            name="ruaOutorgante"
-            value={data.ruaOutorgante || ''}
-            onChange={updateField('ruaOutorgante')}
-            placeholder="Ex: Rua das Flores"
-            required
-          />
-          <FormField
-            label="Número"
-            name="numeroOutorgante"
-            value={data.numeroOutorgante || ''}
-            onChange={updateField('numeroOutorgante')}
-            placeholder="Ex: 123"
-            required
-          />
-          <FormField
-            label="Bairro"
-            name="bairroOutorgante"
-            value={data.bairroOutorgante || ''}
-            onChange={updateField('bairroOutorgante')}
-            placeholder="Ex: Centro"
-            required
-          />
-          <FormField
-            label="Cidade"
-            name="cidadeOutorgante"
-            value={data.cidadeOutorgante || ''}
-            onChange={updateField('cidadeOutorgante')}
-            placeholder="Ex: São Paulo"
-            required
-          />
-          <SelectField
-            label="Estado (UF)"
-            name="ufOutorgante"
-            value={data.ufOutorgante || ''}
-            onChange={updateField('ufOutorgante')}
-            options={ufs}
-            required
-          />
-          <FormField
-            label="CEP"
-            name="cepOutorgante"
-            value={data.cepOutorgante || ''}
-            onChange={updateField('cepOutorgante')}
-            placeholder="00000-000"
+            label="Endereço Completo da Empresa"
+            name="enderecoOutorgante"
+            value={data.enderecoOutorgante || ''}
+            onChange={updateField('enderecoOutorgante')}
+            placeholder="Ex: Rua das Flores, nº 123, Centro, São Paulo - SP, CEP: 01234-567"
+            className="md:col-span-2"
             required
           />
         </FormSection>
@@ -708,43 +670,11 @@ export const ContractForm: React.FC<ContractFormProps> = ({ authToken, onLogout 
             required
           />
           <FormField
-            label="Nacionalidade"
-            name="nacionalidadeRepresentanteOutorgante"
-            value={data.nacionalidadeRepresentanteOutorgante || ''}
-            onChange={updateField('nacionalidadeRepresentanteOutorgante')}
-            placeholder="Ex: Brasileira"
-            required
-          />
-          <FormField
-            label="Estado civil"
-            name="estadoCivilRepresentanteOutorgante"
-            value={data.estadoCivilRepresentanteOutorgante || ''}
-            onChange={updateField('estadoCivilRepresentanteOutorgante')}
-            placeholder="Ex: Solteiro(a), Casado(a)"
-            required
-          />
-          <FormField
-            label="Profissão"
-            name="profissaoRepresentanteOutorgante"
-            value={data.profissaoRepresentanteOutorgante || ''}
-            onChange={updateField('profissaoRepresentanteOutorgante')}
-            placeholder="Ex: Empresário, Administrador"
-            required
-          />
-          <FormField
             label="CPF do representante"
             name="cpfRepresentanteOutorgante"
             value={data.cpfRepresentanteOutorgante || ''}
             onChange={updateField('cpfRepresentanteOutorgante')}
             placeholder="000.000.000-00"
-            required
-          />
-          <FormField
-            label="RG do representante"
-            name="rgRepresentanteOutorgante"
-            value={data.rgRepresentanteOutorgante || ''}
-            onChange={updateField('rgRepresentanteOutorgante')}
-            placeholder="Ex: 12.345.678-9"
             required
           />
         </FormSection>
@@ -786,51 +716,12 @@ export const ContractForm: React.FC<ContractFormProps> = ({ authToken, onLogout 
             required
           />
           <FormField
-            label="Rua/Avenida"
-            name="ruaOutorgante"
-            value={data.ruaOutorgante || ''}
-            onChange={updateField('ruaOutorgante')}
-            placeholder="Ex: Rua das Flores"
-            required
-          />
-          <FormField
-            label="Número"
-            name="numeroOutorgante"
-            value={data.numeroOutorgante || ''}
-            onChange={updateField('numeroOutorgante')}
-            placeholder="Ex: 123"
-            required
-          />
-          <FormField
-            label="Bairro"
-            name="bairroOutorgante"
-            value={data.bairroOutorgante || ''}
-            onChange={updateField('bairroOutorgante')}
-            placeholder="Ex: Centro"
-            required
-          />
-          <FormField
-            label="Cidade"
-            name="cidadeOutorgante"
-            value={data.cidadeOutorgante || ''}
-            onChange={updateField('cidadeOutorgante')}
-            placeholder="Ex: São Paulo"
-            required
-          />
-          <SelectField
-            label="Estado (UF)"
-            name="ufOutorgante"
-            value={data.ufOutorgante || ''}
-            onChange={updateField('ufOutorgante')}
-            options={ufs}
-            required
-          />
-          <FormField
-            label="CEP"
-            name="cepOutorgante"
-            value={data.cepOutorgante || ''}
-            onChange={updateField('cepOutorgante')}
-            placeholder="00000-000"
+            label="Endereço Completo"
+            name="enderecoOutorgante"
+            value={data.enderecoOutorgante || ''}
+            onChange={updateField('enderecoOutorgante')}
+            placeholder="Ex: Rua das Flores, nº 123, Centro, São Paulo - SP, CEP: 01234-567"
+            className="md:col-span-2"
             required
           />
         </FormSection>

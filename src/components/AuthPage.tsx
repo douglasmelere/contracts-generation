@@ -2,40 +2,119 @@ import React, { useState } from 'react';
 import { Header } from './Header';
 import { FormField } from './FormField';
 import { LoadingSpinner } from './LoadingSpinner';
-import { Key, Shield, Lock } from 'lucide-react';
+import { User, Shield, Lock } from 'lucide-react';
 
 interface AuthPageProps {
-  onAuthenticated: (token: string) => void;
+  onAuthenticated: (userData: any) => void;
+}
+
+interface LoginCredentials {
+  username: string;
+  password: string;
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated }) => {
-  const [token, setToken] = useState('');
+  const [credentials, setCredentials] = useState<LoginCredentials>({
+    username: '',
+    password: ''
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleInputChange = (field: keyof LoginCredentials, value: string) => {
+    setCredentials(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    // Limpar erro quando o usuário começar a digitar
+    if (error) setError('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!token.trim()) {
-      setError('Por favor, insira o token de acesso.');
+    if (!credentials.username.trim() || !credentials.password.trim()) {
+      setError('Por favor, preencha todos os campos.');
       return;
     }
 
     setIsLoading(true);
     setError('');
 
-    // Simular validação do token (você pode adicionar validação real aqui)
-    setTimeout(() => {
-      try {
-        // Salvar token no localStorage
-        localStorage.setItem('pagluz_auth_token', token);
-        onAuthenticated(token);
-      } catch (err) {
-        setError('Erro ao salvar token. Tente novamente.');
-      } finally {
-        setIsLoading(false);
+    try {
+      // Criar Basic Auth header
+      const basicAuth = btoa(`${credentials.username}:${credentials.password}`);
+      
+      // Fazer request para o endpoint de autenticação do N8N
+      const response = await fetch('https://n8n.pagluz.com.br/webhook/e6e34398-975b-417f-882d-285d377b9659', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Basic ${basicAuth}`
+        },
+        body: JSON.stringify({
+          action: 'login',
+          username: credentials.username,
+          password: credentials.password,
+        }),
+      });
+
+      console.log('Response status:', response.status);
+
+      if (response.status === 401) {
+        setError('Usuário ou senha incorretos.');
+        return;
       }
-    }, 1000);
+
+      if (response.status === 403) {
+        setError('Acesso negado. Verifique suas permissões.');
+        return;
+      }
+
+      if (!response.ok) {
+        setError(`Erro no servidor (${response.status}). Tente novamente.`);
+        return;
+      }
+
+      // Ler resposta
+      const responseText = await response.text();
+      console.log('Response:', responseText);
+
+      let responseData;
+      try {
+        responseData = JSON.parse(responseText);
+      } catch {
+        // Se não for JSON, assumir sucesso baseado no status 200
+        responseData = { success: true, message: responseText };
+      }
+
+      // Verificar se há indicação de falha na resposta
+      if (responseData.success === false || responseData.error) {
+        setError(responseData.message || responseData.error || 'Erro na autenticação.');
+        return;
+      }
+
+      // Login bem-sucedido!
+      console.log('Login successful!');
+      
+      // Salvar credenciais
+      localStorage.setItem('pagluz_username', credentials.username);
+      localStorage.setItem('pagluz_password', credentials.password);
+      
+      // Passar dados de autenticação para o componente pai
+      onAuthenticated({ 
+        username: credentials.username, 
+        password: credentials.password,
+        user: responseData.user || { name: credentials.username }
+      });
+
+    } catch (err) {
+      console.error('Erro durante autenticação:', err);
+      setError('Erro de conexão. Verifique sua internet e tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,18 +131,28 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated }) => {
               Acesso Seguro
             </h2>
             <p className="text-gray-600">
-              Insira seu token de autenticação para acessar o sistema de contratos
+              Faça login com suas credenciais para acessar o sistema
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <FormField
-              label="Token de Acesso"
-              name="token"
+              label="Nome de Usuário"
+              name="username"
+              type="text"
+              value={credentials.username}
+              onChange={(value) => handleInputChange('username', value)}
+              placeholder="Digite seu nome de usuário"
+              required
+            />
+
+            <FormField
+              label="Senha"
+              name="password"
               type="password"
-              value={token}
-              onChange={setToken}
-              placeholder="Digite seu token de autenticação"
+              value={credentials.password}
+              onChange={(value) => handleInputChange('password', value)}
+              placeholder="Digite sua senha"
               required
               error={error}
             />
@@ -77,22 +166,22 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated }) => {
                 <LoadingSpinner />
               ) : (
                 <>
-                  <Key className="h-5 w-5 mr-2" />
-                  Acessar Sistema
+                  <User className="h-5 w-5 mr-2" />
+                  Entrar no Sistema
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-8 p-4 bg-blue-50 rounded-xl border border-blue-200">
+          <div className="mt-8 p-4 bg-green-50 rounded-xl border border-green-200">
             <div className="flex items-start">
-              <Lock className="h-5 w-5 text-blue-600 mr-3 mt-0.5" />
+              <Lock className="h-5 w-5 text-green-600 mr-3 mt-0.5" />
               <div>
-                <h4 className="text-sm font-semibold text-blue-900 mb-1">
-                  Segurança
+                <h4 className="text-sm font-semibold text-green-900 mb-1">
+                  ✅ Autenticação Configurada
                 </h4>
-                <p className="text-xs text-blue-700">
-                  Seu token é armazenado localmente e usado para autenticação segura com nossos serviços.
+                <p className="text-xs text-green-700">
+                  Sistema configurado com Basic Authentication. Suas credenciais são verificadas no servidor.
                 </p>
               </div>
             </div>

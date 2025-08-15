@@ -47,30 +47,23 @@ export interface ContractData extends BaseDocumentData {
   diaPagamento: number;
   prazoVigencia: number;
   prazoVigenciaPorExtenso: string;
+  prazoMulta: number;
 }
 
 export interface ServiceContractData extends BaseDocumentData {
   documentType: 'prestacao';
   // Dados do Contratante
   nomeContratante: string;
-  tipoDocumentoContratante: 'cpf' | 'cnpj';
   cpfCnpjContratante: string;
-  ruaContratante: string;
-  numeroContratante: string;
-  bairroContratante: string;
-  cidadeContratante: string;
-  ufContratante: string;
-  cepContratante: string;
+  enderecoContratante: string;
   emailContratante: string;
+  nomeRepresentanteContratante: string;
+  cpfRepresentanteContratante: string;
   
-  // Dados do Serviço
-  tipoServico: string;
-  descricaoServico: string;
-  valorServico: number;
-  valorServicoPorExtenso: string;
-  prazoExecucao: number;
-  prazoExecucaoPorExtenso: string;
-  formaPagamento: string;
+  // Dados Operacionais
+  tipoEnergia: string;
+  emailComunicacoes: string;
+  prazoMinimoMulta: number;
 }
 
 export interface ProcuracaoPJData extends BaseDocumentData {
@@ -79,20 +72,11 @@ export interface ProcuracaoPJData extends BaseDocumentData {
   // Dados da Empresa Outorgante
   razaoSocialOutorgante: string;
   cnpjOutorgante: string;
-  ruaOutorgante: string;
-  numeroOutorgante: string;
-  bairroOutorgante: string;
-  cidadeOutorgante: string;
-  ufOutorgante: string;
-  cepOutorgante: string;
+  enderecoOutorgante: string; // Endereço completo
   // Dados do Representante Legal
   cargoRepresentanteOutorgante: string;
   nomeRepresentanteOutorgante: string;
-  nacionalidadeRepresentanteOutorgante: string;
-  estadoCivilRepresentanteOutorgante: string;
-  profissaoRepresentanteOutorgante: string;
   cpfRepresentanteOutorgante: string;
-  rgRepresentanteOutorgante: string;
 }
 
 export interface ProcuracaoPFData extends BaseDocumentData {
@@ -102,13 +86,12 @@ export interface ProcuracaoPFData extends BaseDocumentData {
   nomeOutorgante: string;
   cpfOutorgante: string;
   ocupacaoOutorgante: string;
-  ruaOutorgante: string;
-  numeroOutorgante: string;
-  bairroOutorgante: string;
-  cidadeOutorgante: string;
-  ufOutorgante: string;
-  cepOutorgante: string;
+  enderecoOutorgante: string; // Endereço completo
 }
 
 export type DocumentData = ContractData | ServiceContractData | ProcuracaoPJData | ProcuracaoPFData;
 
+export interface WebhookResponse {
+  success: boolean;
+  message: string;
+}

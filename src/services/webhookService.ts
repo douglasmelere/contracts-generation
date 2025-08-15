@@ -2,11 +2,11 @@ import { DocumentData, WebhookResponse } from '../types/Contract';
 
 export const sendToWebhook = async (
   data: DocumentData,
-  token: string
+  authData: any
 ): Promise<WebhookResponse> => {
   const url = import.meta.env.VITE_WEBHOOK_URL || "https://n8n.pagluz.com.br/webhook/e6e34398-975b-417f-882d-285d377b9659";
 
-  console.log(token)
+  console.log('Auth data:', authData);
 
   if (!url) {
     return {
@@ -16,11 +16,14 @@ export const sendToWebhook = async (
   }
 
   try {
+    // Criar Basic Auth header
+    const basicAuth = btoa(`${authData.username}:${authData.password}`);
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Basic ${basicAuth}`,
       },
       body: JSON.stringify(data),
     });
